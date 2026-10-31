@@ -1,124 +1,273 @@
-# Proyek Klasifikasi Gambar: Intel Image Classification
+# Proyek Klasifikasi Gambar
 
-## Informasi Proyek
+## Deskripsi Proyek
 
-Proyek ini membangun model klasifikasi gambar menggunakan dataset Intel Image Classification dengan pendekatan Convolutional Neural Network (CNN) dan Transfer Learning MobileNetV2. Dataset dibagi secara manual menjadi training, validation, dan testing set. Model kemudian dikonversi ke format SavedModel, TensorFlow Lite, dan TensorFlow.js sesuai kriteria submission Dicoding.
+Proyek ini merupakan implementasi klasifikasi gambar menggunakan TensorFlow dan Keras untuk mengidentifikasi enam kategori pemandangan pada dataset Intel Image Classification.
 
-**Nama:** Yose Willmingthon Simanjuntak
-
-**Dataset:** Intel Image Classification
-
-**Sumber Dataset:**
-https://www.kaggle.com/datasets/puneet6060/intel-image-classification
-
-## Deskripsi Dataset
-
-Dataset Intel Image Classification merupakan dataset klasifikasi citra yang berisi gambar pemandangan alam dan lingkungan yang terbagi ke dalam enam kelas:
-
-- Buildings
-- Forest
-- Glacier
-- Mountain
-- Sea
-- Street
-
-Dataset terdiri dari sekitar 25.000 gambar RGB.
-
-## Data Preparation
-
-Pada proyek ini dilakukan beberapa tahapan persiapan data:
-
-1. Menggabungkan seluruh data dari folder train dan test bawaan dataset.
-2. Melakukan pembagian dataset secara manual menggunakan train_test_split.
-3. Membagi dataset menjadi:
-   - Training Set : 70%
-   - Validation Set : 15%
-   - Test Set : 15%
-4. Melakukan preprocessing dengan mengubah ukuran gambar menjadi 224x224 piksel.
-5. Melakukan normalisasi piksel menggunakan rescale 1/255.
-6. Menerapkan data augmentation pada data training:
-   - Random Rotation
-   - Horizontal Flip
-   - Zoom
-
-## Arsitektur Model
-
-Model dibangun menggunakan TensorFlow dan Keras dengan kombinasi:
+Model dibangun menggunakan kombinasi Transfer Learning MobileNetV2 dan Convolutional Neural Network (CNN) yang memenuhi kriteria penggunaan:
 
 - Sequential Model
-- Conv2D
-- MaxPooling2D
-- MobileNetV2 (Transfer Learning)
+- Conv2D Layer
+- MaxPooling2D Layer
 - GlobalAveragePooling2D
 - Dense Layer
 - Dropout Layer
 
-Struktur utama model:
+---
 
-- Conv2D(32)
-- MaxPooling2D
+# Dataset
+
+Dataset yang digunakan:
+
+**Intel Image Classification**
+
+Kelas yang digunakan:
+
+1. Buildings
+2. Forest
+3. Glacier
+4. Mountain
+5. Sea
+6. Street
+
+Total kelas:
+
+```text
+6 Kelas
+```
+
+---
+
+# Data Preparation
+
+Dataset asli menyediakan folder:
+
+```text
+seg_train
+seg_test
+```
+
+Untuk memenuhi ketentuan proyek, seluruh dataset terlebih dahulu digabungkan menjadi satu dataset kemudian dilakukan pembagian data secara mandiri menggunakan train_test_split.
+
+## Data Splitting
+
+Proporsi data:
+
+```text
+Training Set   : 70%
+Validation Set : 15%
+Test Set       : 15%
+```
+
+Pembagian dilakukan menggunakan:
+
+```python
+train_test_split(
+    stratify=label,
+    random_state=42
+)
+```
+
+---
+
+# Preprocessing
+
+Semua gambar diproses dengan:
+
+```text
+Ukuran gambar : 224 x 224 piksel
+Color Mode    : RGB
+```
+
+Normalisasi dilakukan menggunakan:
+
+```python
+ImageDataGenerator(
+    rescale=1./255
+)
+```
+
+---
+
+# Arsitektur Model
+
+Model dibangun menggunakan Sequential Model dengan struktur:
+
+```text
+Input
+↓
+MobileNetV2 (ImageNet Pretrained)
+↓
+Conv2D (8 Filter, Kernel 1x1)
+↓
+MaxPooling2D
+↓
+GlobalAveragePooling2D
+↓
+Dense (256)
+↓
+Dropout (0.5)
+↓
+Dense (6, Softmax)
+```
+
+Layer yang digunakan:
+
 - MobileNetV2
+- Conv2D
+- MaxPooling2D
 - GlobalAveragePooling2D
-- Dense(256)
-- Dropout(0.5)
-- Dense(6, Softmax)
+- Dense
+- Dropout
 
-## Callback
+---
 
-Model menggunakan callback:
+# Konfigurasi Training
 
-- EarlyStopping
-- ReduceLROnPlateau
-- ModelCheckpoint
+## Optimizer
 
-## Hasil Pelatihan
+```text
+Adam
+```
 
-Hasil terbaik yang diperoleh:
+## Learning Rate
 
-- Training Accuracy : 92.06%
-- Validation Accuracy : 91.42%
-- Testing Accuracy : 90.90%
+```text
+0.0001
+```
 
-Model berhasil melampaui target minimum akurasi 85% sesuai kriteria submission.
+## Loss Function
 
-## Visualisasi
+```text
+Categorical Crossentropy
+```
 
-Notebook menampilkan:
+## Metric
 
-- Distribusi dataset
-- Contoh gambar dataset
-- Grafik Accuracy
-- Grafik Loss
+```text
+Accuracy
+```
+
+---
+
+# Callback
+
+Model dilatih menggunakan beberapa callback:
+
+### EarlyStopping
+
+Menghentikan training jika performa validasi tidak meningkat.
+
+### ReduceLROnPlateau
+
+Menurunkan learning rate secara otomatis ketika proses training stagnan.
+
+### ModelCheckpoint
+
+Menyimpan model terbaik berdasarkan validation accuracy.
+
+---
+
+# Hasil Training
+
+Model menghasilkan performa sebagai berikut:
+
+```text
+Training Accuracy   : 92.22%
+Validation Accuracy : 91.19%
+Testing Accuracy    : 91.
+
+47%
+```
+
+Hasil tersebut menunjukkan bahwa model berhasil melampaui target minimum akurasi 85%.
+
+---
+
+# Classification Report
+
+Performa setiap kelas:
+
+| Kelas | Precision |
+|---------|---------|
+| Buildings | 0.90 |
+| Forest | 0.99 |
+| Glacier | 0.84 |
+| Mountain | 0.89 |
+| Sea | 0.93 |
+| Street | 0.94 |
+
+Ringkasan evaluasi:
+
+```text
+Overall Accuracy : 91%
+Macro Average    : 92%
+Weighted Average : 91%
+```
+
+---
+
+# Visualisasi Evaluasi
+
+Notebook menampilkan visualisasi:
+
+- Training Accuracy vs Validation Accuracy
+- Training Loss vs Validation Loss
 - Classification Report
 - Confusion Matrix
 
-## Inference
+Visualisasi digunakan untuk menganalisis proses pembelajaran model dan mendeteksi overfitting maupun underfitting.
 
-Model berhasil melakukan prediksi pada gambar baru.
+---
 
-Contoh hasil inferensi:
+# Inference
 
-- Predicted Class : buildings
-- Confidence : 99.72%
+Model mampu melakukan prediksi terhadap gambar baru dan menghasilkan:
 
-## Format Model yang Dihasilkan
+```text
+Predicted Label
+Confidence Score
+```
 
-### SavedModel
+---
+
+# Model Export
+
+Model diekspor ke beberapa format deployment.
+
+## SavedModel
 
 ```text
 saved_model/
 ├── saved_model.pb
+├── assets/
 └── variables/
 ```
 
-### TensorFlow Lite
+---
+
+## TensorFlow Lite
 
 ```text
-model.tflite
-label.txt
+tflite/
+├── model.tflite
+└── label.txt
 ```
 
-### TensorFlow.js
+Isi label:
+
+```text
+buildings
+forest
+glacier
+mountain
+sea
+street
+```
+
+---
+
+## TensorFlow.js
 
 ```text
 tfjs_model/
@@ -126,44 +275,37 @@ tfjs_model/
 └── group1-shard1of1.bin
 ```
 
-## Requirements
+---
 
-Dependency proyek tersedia pada file:
+# Requirements
+
+Semua dependency tersedia pada file:
 
 ```text
 requirements.txt
 ```
 
-## Cara Menjalankan Project
-
-1. Install dependency:
+Instalasi:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Jalankan notebook:
+---
 
-```text
-notebook.ipynb
-```
-
-3. Training model.
-
-4. Lakukan evaluasi model.
-
-5. Jalankan proses inferensi.
-
-## Struktur Submission
+# Struktur Submission
 
 ```text
 submission/
+│
 ├── notebook.ipynb
+├── tfjs_model.ipynb
 ├── README.md
 ├── requirements.txt
 │
 ├── saved_model/
 │   ├── saved_model.pb
+│   ├── assets/
 │   └── variables/
 │
 ├── tflite/
@@ -174,3 +316,24 @@ submission/
     ├── model.json
     └── group1-shard1of1.bin
 ```
+
+---
+
+# Teknologi yang Digunakan
+
+- Python
+- TensorFlow 2.15.0
+- TensorFlow.js 4.22.0
+- MobileNetV2
+- NumPy
+- Pandas
+- Matplotlib
+- Scikit-Learn
+- Pillow
+- KaggleHub
+
+---
+
+# Author
+
+Yose Willmingthon Simanjuntak
